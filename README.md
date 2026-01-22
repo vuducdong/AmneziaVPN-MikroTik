@@ -226,7 +226,7 @@ add action=masquerade chain=srcnat out-interface=docker-awg-veth
 8) Создадим запись "mounts" для проброса файла конфигурации клиента AWG в контейнер
 ```
 /container mounts
-add name=awg_conf  dst=/etc/amnezia/amneziawg/ src=wg/
+add dst=/etc/amnezia/amneziawg list=awg_conf src=/wg
 ```
 9) Сконфигурируем временный каталог и url для скачивания контейнера
 ```
@@ -239,19 +239,19 @@ add name=awg_conf  dst=/etc/amnezia/amneziawg/ src=wg/
 *  Для ARMv7 (arm)
 
 ```
-/container add hostname=amnezia interface=docker-awg-veth mounts=awg_conf root-dir=/amnezia logging=yes start-on-boot=yes remote-image=catesin/awg-mikrotik-arm:latest 
+/container add hostname=amnezia interface=docker-awg-veth mountlists=awg_conf root-dir=/amnezia logging=yes start-on-boot=yes remote-image=catesin/awg-mikrotik-arm:latest 
 ```
 
 * Для ARMv8 (arm64)
 
 ```
-/container add hostname=amnezia interface=docker-awg-veth mounts=awg_conf root-dir=/amnezia logging=yes start-on-boot=yes remote-image=catesin/awg-mikrotik-arm64:latest
+/container add hostname=amnezia interface=docker-awg-veth mountlists=awg_conf root-dir=/amnezia logging=yes start-on-boot=yes remote-image=catesin/awg-mikrotik-arm64:latest
 ```
 
 * Для amd64
 
 ```
-/container add hostname=amnezia interface=docker-awg-veth mounts=awg_conf root-dir=/amnezia logging=yes start-on-boot=yes remote-image=catesin/awg-mikrotik-amd64:latest
+/container add hostname=amnezia interface=docker-awg-veth mountlists=awg_conf root-dir=/amnezia logging=yes start-on-boot=yes remote-image=catesin/awg-mikrotik-amd64:latest
 ```
 
 Подождите немного пока контейнер распакуется до конца. В итоге у вас должна получиться похожая картина, в которой есть распакованный контейнер и файл конфигурации AWG.
