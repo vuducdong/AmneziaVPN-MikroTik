@@ -125,18 +125,22 @@ add action=mark-routing chain=output connection-mark=to-vpn-conn-local \
 ### Готовые контейнеры
 
 <a name='Build_ready'></a>
-**Где взять контейнер?** Его можно собрать самому из текущего репозитория каталога **"Containers"** или скачать готовый образ под выбранную архитектуру из [Docker Hub](https://hub.docker.com/u/catesin).
+**Где взять контейнер?**
 
-Выбрав вариант с готовым образом [переходим сразу к настройке](#MikroTik_container_2).
+Выбираем один из трёх вариантов:
+1) Скачать готовый контейнер в формате "tar" из текущего репозитория каталога **"Builds"**
+2) Cкачать готовый образ под выбранную архитектуру из [Docker Hub](https://hub.docker.com/u/catesin)
+3) Cобрать самому из текущего репозитория каталога **"Containers"**
+
+Выбрав вариант с готовым образом 1 или 2 [переходим сразу к настройке](#MikroTik_container_2).
 
 
 Для самостоятельной сборки следует установить подсистему Docker [buildx](https://github.com/docker/buildx?tab=readme-ov-file), "make" и "go".
 
 В текущем примере будем собирать на Windows:
 1) Скачиваем [Docker Desktop](https://docs.docker.com/desktop/) и устанавливаем
-2) Скачиваем нужный архив для сборки из каталога **"Containers"** под вашу архитектуру RouterOS.
-3) Распаковываем архив
-3) Открываем CMD и переходим в распакованный каталог (cd <путь до каталога>)
+2) Скачиваем нужный раздел для сборки из каталога **"Containers"** под вашу архитектуру RouterOS.
+3) Открываем CMD и переходим в раздел (cd <путь до каталога>)
 4) Запускаем Docker с ярлыка на рабочем столе (окно приложения должно просто работать в фоне при сборке) и через cmd собираем контейнер под выбранную архитектуру RouterOS
 
 - ARMv7 (arm/v7) — спецификация 7-го поколения оборудования ARM, которое поддерживает только архитектуру AArch32. 
@@ -237,25 +241,30 @@ add dst=/etc/amnezia/amneziawg list=awg_conf src=/wg
 
 /container/config/set registry-url=https://registry-1.docker.io tmpdir=/tmp
 ```
-10) Теперь создадим сам контейнер (не создавайте заранее каталог для параметра "root-dir")
+10) Теперь создадим(распакуем) сам контейнер (не создавайте заранее каталог для параметра "root-dir")
 
-*  Для ARMv7 (arm)
+:warning: Если вы выбрали вариант с готовым контейнером в формате "tar" из текущего каталога **"Builds"**, вам следуем загрузить архив контейнера, выбранный под вашу архитектуру, во внутреннее хранилище RouterOS, в каталог "tmp". Сделать это можно с помощью стандартных функций Winbox или WinSCP.
 
-```
-/container add hostname=amnezia interface=docker-awg-veth mountlists=awg_conf root-dir=/amnezia logging=yes start-on-boot=yes remote-image=catesin/awg-mikrotik-arm:latest 
-```
-
-* Для ARMv8 (arm64)
+*  Для ARMv7 (arm) из текущего каталога **"Builds"**
 
 ```
-/container add hostname=amnezia interface=docker-awg-veth mountlists=awg_conf root-dir=/amnezia logging=yes start-on-boot=yes remote-image=catesin/awg-mikrotik-arm64:latest
+/container add hostname=amnezia interface=docker-awg-veth mountlists=awg_conf root-dir=/amnezia logging=yes start-on-boot=yes file=tmp/awg-mikrotik-arm.tar
 ```
 
-* Для amd64
+* Для ARMv8 (arm64) из текущего каталога **"Builds"**
 
 ```
-/container add hostname=amnezia interface=docker-awg-veth mountlists=awg_conf root-dir=/amnezia logging=yes start-on-boot=yes remote-image=catesin/awg-mikrotik-amd64:latest
+/container add hostname=amnezia interface=docker-awg-veth mountlists=awg_conf root-dir=/amnezia logging=yes start-on-boot=yes file=tmp/awg-mikrotik-arm64.tar
 ```
+
+* Для amd64 из текущего каталога **"Builds"**
+
+```
+/container add hostname=amnezia interface=docker-awg-veth mountlists=awg_conf root-dir=/amnezia logging=yes start-on-boot=yes file=tmp/awg-mikrotik-amd64.tar
+```
+:warning:  Если вы выбрали вариант готового образа из [Docker Hub](https://hub.docker.com/u/catesin), 
+в вышеописанных командах следует изменить окончание с ```file=tmp/awg-mikrotik-*****.tar``` на ```remote-image=catesin/awg-mikrotik-*****:latest``` где -```*****``` название архитектуры.
+
 
 Подождите немного пока контейнер распакуется до конца. В итоге у вас должна получиться похожая картина, в которой есть распакованный контейнер и файл конфигурации AWG.
 

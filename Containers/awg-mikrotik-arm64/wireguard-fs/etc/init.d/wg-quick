@@ -1,0 +1,77 @@
+#!/sbin/openrc-run
+
+description="Amnezia WG Quick Up"
+
+depend() {
+    need localmount
+    need net
+}
+
+start_pre()
+{
+cat <<EOF > /etc/nftables.nft
+#!/usr/sbin/nft -f
+
+flush ruleset
+
+############################
+# MANGLE (mark for routing)
+############################
+table inet mangle {
+
+	chain forward {
+		type filter hook forward priority mangle;
+
+		# MSS clamping для TCP SYN пакетов
+		oifname "awg0" tcp flags syn tcp option maxseg size set rt mtu
+		
+	}
+}
+
+############################
+# NAT
+############################
+table ip nat {
+
+chain postrouting {
+		type nat hook postrouting priority srcnat;
+
+		oifname "awg0" masquerade
+	}
+}
+
+table ip6 nat {
+
+	chain postrouting {
+		type nat hook postrouting priority srcnat;
+
+		oifname "awg0" masquerade
+	}
+}
+
+EOF
+nft -c -f /etc/nftables.nft
+
+systemctl restart nftables
+sysctl -p
+sed -i 's/^nameserver .*/nameserver 172.18.20.1/' /etc/resolv.conf
+resolvconf -u
+}
+
+start() {
+for file in $(grep '\[Interface\]' /etc/amnezia/amneziawg/*.conf -l 2>/dev/null); do
+	interface=$(basename $file .conf)
+	ebegin "Starting Amnezia WG interface $interface"
+	/usr/bin/awg-quick up $file
+done
+eend 0
+}
+
+stop() {
+for file in $(grep '\[Interface\]' /etc/amnezia/amneziawg/*.conf -l 2>/dev/null); do
+	interface=$(basename $file .conf)
+	ebegin "Stoping Amnezia WG interface $interface"
+	/usr/bin/awg-quick down $file
+done
+eend 0
+}
