@@ -51,8 +51,8 @@ table ip6 nat {
 
 EOF
 nft -c -f /etc/nftables.nft
+rc-service nftables restart
 
-systemctl restart nftables
 sysctl -p
 sed -i 's/^nameserver .*/nameserver 172.18.20.1/' /etc/resolv.conf
 resolvconf -u
