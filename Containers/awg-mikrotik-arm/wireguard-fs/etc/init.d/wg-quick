@@ -9,53 +9,19 @@ depend() {
 
 start_pre()
 {
-cat <<EOF > /etc/nftables.nft
-#!/usr/sbin/nft -f
-
-flush ruleset
-
-############################
-# MANGLE (mark for routing)
-############################
-table inet mangle {
-
-	chain forward {
-		type filter hook forward priority mangle;
-
-		# MSS clamping для TCP SYN пакетов
-		oifname "awg0" tcp flags syn tcp option maxseg size set rt mtu
-		
-	}
-}
-
-############################
-# NAT
-############################
-table ip nat {
-
-chain postrouting {
-		type nat hook postrouting priority srcnat;
-
-		oifname "awg0" masquerade
-	}
-}
-
-table ip6 nat {
-
-	chain postrouting {
-		type nat hook postrouting priority srcnat;
-
-		oifname "awg0" masquerade
-	}
-}
-
-EOF
-nft -c -f /etc/nftables.nft
-
-systemctl restart nftables
-sysctl -p
-sed -i 's/^nameserver .*/nameserver 172.18.20.1/' /etc/resolv.conf
-resolvconf -u
+    iptables -F
+	iptables -t nat -F
+	iptables -t mangle -F
+	iptables -X
+	iptables -t nat -A POSTROUTING -o awg0 -j MASQUERADE
+	ip6tables -F
+	ip6tables -t nat -F
+	ip6tables -t mangle -F
+	ip6tables -X
+	ip6tables -t nat -A POSTROUTING -o awg0 -j MASQUERADE
+	sysctl -p
+	sed -i 's/^nameserver .*/nameserver 172.18.20.1/' /etc/resolv.conf
+	resolvconf -u
 }
 
 start() {

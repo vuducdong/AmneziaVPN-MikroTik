@@ -209,7 +209,7 @@ add distance=1 dst-address=0.0.0.0/0 gateway=172.18.20.2 routing-table=r_to_vpn
 /ip firewall nat
 add action=masquerade chain=srcnat out-interface=docker-awg-veth
 ```
-6) Создадим каталог в корне "wg"
+6) Создадим каталог в корне "wg" и поместим в него нашу конфигурацию
 ```
 /file add type=directory name=wg
 ```

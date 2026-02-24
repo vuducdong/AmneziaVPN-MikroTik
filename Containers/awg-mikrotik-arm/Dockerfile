@@ -19,7 +19,7 @@ RUN cd /go/amneziawg-tools/src && \
 
 FROM alpine:${ALPINE_VERSION}
 RUN set -ex; \
-	apk update && apk add --no-cache bash openrc nftables iproute2 openresolv  \
+	apk update && apk add --no-cache bash openrc iptables ip6tables iptables-legacy iproute2 openresolv  \
     && mkdir -p /etc/amnezia/amneziawg/
 
 COPY --from=builder /go/amneziawg-go/amneziawg-go /usr/bin/amneziawg-go
@@ -42,7 +42,9 @@ RUN \
         /etc/init.d/machine-id
 RUN    sed -i 's/cmd sysctl -q \(.*\?\)=\(.*\)/[[ "$(sysctl -n \1)" != "\2" ]] \&\& \0/' /usr/bin/awg-quick
 
-RUN rc-update add nftables boot
+RUN	rm /usr/sbin/iptables && ln -s /usr/sbin/iptables-legacy /usr/sbin/iptables 
+RUN rm /usr/sbin/ip6tables && ln -s /usr/sbin/ip6tables-legacy /usr/sbin/ip6tables
+
 RUN rc-update add wg-quick default
 
 RUN echo -e " \n\
